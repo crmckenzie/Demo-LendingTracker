@@ -1,0 +1,121 @@
+﻿<div class="row">
+    <form>
+        <div class="form-group">
+            <label class="control-label">Title</label>
+            <input class="form-control" type="text" data-bind="value: newTitle"/>
+        </div>
+        <div class="form-group">
+            <label class="control-label">Author</label>
+            <input class="form-control" type="text" data-bind="value: newAuthor" />
+        </div>
+        <div class="form-group">
+            <label class="control-label">Type</label>
+            <input class="form-control" type="text" data-bind="value: newType" />
+        </div>
+        <div class="form-group">
+            <button class="btn btn-primary" data-bind="enable: canAddNewTitle, click: addNewTitle">New</button>
+        </div>
+    </form>
+</div>
+<div class="row">
+    <table class="table table-bordered table-hover table-striped">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Media Type</th>
+                <th>Borrowed By</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody data-bind="foreach:media">
+            <tr>
+                <td data-bind="text:title"></td>
+                <td data-bind="text:author"></td>
+                <td data-bind="text:type"></td>
+                <td data-bind="text:borrowedBy"></td>
+                <td>
+                    <button type="button" class="btn btn-default" data-bind="click: borrow, visible: canBorrow">Borrow</button>
+                    <button type="button" class="btn btn-default" data-bind="click: unborrow, visible: canUnBorrow">Return</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+
+<script type="text/javascript">
+    $(function () {
+
+        function getTestData() {
+            return [
+                { title: "The Art of Unit Testing", author: "Roy Osherove", type: "Book", borrowedBy: "Joel S." },
+                { title: "The Dark Side of the Moon", author: "Pink Floyd", type: "CD", borrowedBy: null },
+                { title: "Star Wars: A New Hope", author: "George Lucas", type: "DVD", borrowedBy: "Marilyn G." },
+                { title: "Javascript: The Good Parts", author: "Douglas Crockford", type: "Book", borrowedBy: null},
+            ];
+        }
+
+        function Title(data) {
+            var self = this;
+
+            this.title = ko.observable(data.title || "");
+            this.author = ko.observable(data.author || "");
+            this.type = ko.observable(data.type || "");
+            this.borrowedBy = ko.observable(data.borrowedBy);
+
+            this.borrow = function() {
+                var borrower = window.prompt("Who is borrowing " + self.title() + "?");
+                if (borrower) {
+                    self.borrowedBy(borrower);
+                }
+            };
+
+            this.unborrow = function() {
+                self.borrowedBy(null);
+            };
+
+            this.canBorrow = ko.computed(function() {
+                return self.borrowedBy() == null;
+            }, self);
+
+            this.canUnBorrow = ko.computed(function() {
+                return self.borrowedBy();
+            }, self);
+        }
+
+        function MediaListViewModel() {
+            var self = this;
+
+            this.media = ko.observable([]);
+
+            this.newTitle = ko.observable("");
+            this.newAuthor = ko.observable("");
+            this.newType = ko.obervable("");
+
+            this.canAddNewTitle = k.computed(function() {
+                return self.newTitle() && self.newAuthor() && self.newType();
+            }, self);
+
+            this.addNewTitle = function() {
+                var title = new Title();
+                title.title(self.newTitle());
+                title.author(self.newAuthor());
+                title.type(self.newType());
+
+                self.media.push(title);
+            };
+        }
+
+        var testData = getTestData();
+        var media = $.map(testData, function(e) {
+            return new Title(e);
+        });
+
+        var viewModel = new MediaListViewModel();
+        viewModel.media(media);
+
+        ko.applyBindings(viewModel, $("body")[0]);
+    });
+</script>
+
