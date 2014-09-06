@@ -16,6 +16,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configurations", "Configura
 		PublishScripts\Configurations\Demo-LendingTracker-WAWS-dev.json = PublishScripts\Configurations\Demo-LendingTracker-WAWS-dev.json
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo-LendingTracker.Tests", "Demo-LendingTracker.Tests\Demo-LendingTracker.Tests.csproj", "{B6848090-FB02-4A34-9401-7146D007E8BB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3E882B41-763E-4DA8-A1D7-B0BD12B43CD2}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".node", ".node", "{482ABE7C-507E-46D9-A105-802A8E7DA6D3}"
+	ProjectSection(SolutionItems) = preProject
+		Gruntfile.js = Gruntfile.js
+		karma.conf.js = karma.conf.js
+		package.json = package.json
+		test-main.js = test-main.js
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +41,10 @@ Global
 		{F460F3D2-3214-4A64-A852-A87165D36BFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F460F3D2-3214-4A64-A852-A87165D36BFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F460F3D2-3214-4A64-A852-A87165D36BFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6848090-FB02-4A34-9401-7146D007E8BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6848090-FB02-4A34-9401-7146D007E8BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6848090-FB02-4A34-9401-7146D007E8BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6848090-FB02-4A34-9401-7146D007E8BB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

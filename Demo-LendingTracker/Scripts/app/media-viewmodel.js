@@ -1,0 +1,3 @@
+﻿define(['ko'], function(ko) {
+
+});
