@@ -1,8 +1,8 @@
-﻿<div class="row">
+﻿<div id="new-title-form" class="row" style="display:none">
     <form>
         <div class="form-group">
             <label class="control-label">Title</label>
-            <input class="form-control" type="text" data-bind="value: newTitle"/>
+            <input id="new-title" class="form-control" type="text" data-bind="value: newTitle"/>
         </div>
         <div class="form-group">
             <label class="control-label">Author</label>
@@ -12,14 +12,44 @@
             <label class="control-label">Type</label>
             <input class="form-control" type="text" data-bind="value: newType" />
         </div>
-        <div class="form-group">
-            <button class="btn btn-primary" data-bind="enable: canAddNewTitle, click: addNewTitle">New</button>
+        <div class="form-group">            
+            <button class="btn btn-success" data-bind="enable: canAddNewTitle, click: addNewTitle">Add</button>
+            <button class="btn btn-danger" data-bind="click: cancelAddNewTitle">Cancel</button>
         </div>
     </form>
 </div>
-<div class="row">
+<div id="borrower-form" class="row" style="display:none">
+    <form>
+        <div class="form-group">
+            <label class="control-label">Who is borrowing <span class="text-primary" data-bind="text: titleToBorrow"></span></label>
+            <input id="proposed-borrower" class="form-control" data-bind="value: proposedBorrower"/>
+        </div>
+        <div class="form-group">
+            <button class="btn btn-success" data-bind="enable: proposedBorrower(), click: borrow">Add</button>
+            <button class="btn btn-danger" data-bind="click: function(){ $root.cancelBorrow(); } ">Cancel</button>
+        </div>
+    </form>
+</div>
+<div id="display-media" class="row">
     <table class="table table-bordered table-hover table-striped">
         <thead>
+            <tr>
+                <th colspan="3">
+                    <div class="btn-toolbar">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary" data-bind="click: displayNewTitleForm"><span class="glyphicon glyphicon-plus"></span> New</button>
+                            <button type="button" class="btn btn-primary" data-bind="click: save, enable: isDirty"><span class="glyphicon glyphicon-save"></span> Save</button>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary" data-bind="click: exportData"><span class="glyphicon glyphicon-download"></span> Export</button>
+                            <button type="button" class="btn btn-primary" data-bind="click: importData"><span class="glyphicon glyphicon-upload"></span> Import</button>
+                        </div>                        
+                    </div>
+                </th>
+                <th colspan="3">
+                    Borrowed Items: <span data-bind="text: borrowedItems"></span>
+                </th>
+            </tr>
             <tr>
                 <th>Title</th>
                 <th>Author</th>
@@ -30,13 +60,19 @@
         </thead>
         <tbody data-bind="foreach:media">
             <tr>
-                <td data-bind="text:title"></td>
+                <td class="text-primary" data-bind="text:title"></td>
                 <td data-bind="text:author"></td>
                 <td data-bind="text:type"></td>
-                <td data-bind="text:borrowedBy"></td>
                 <td>
-                    <button type="button" class="btn btn-default" data-bind="click: borrow, visible: canBorrow">Borrow</button>
-                    <button type="button" class="btn btn-default" data-bind="click: unborrow, visible: canUnBorrow">Return</button>
+                    <button type="button" class="btn btn-primary" data-bind="click: function(){ $root.displayBorrowForm($data); }, visible: canBorrow"><span class="glyphicon glyphicon-chevron-right"></span> Borrow</button>
+                    <button type="button" class="btn btn-success" data-bind="click: unborrow, visible: canUnBorrow"><span class="glyphicon glyphicon-chevron-left"></span> Return</button>
+                    <span data-bind="text: borrowedBy"></span>
+                </td>
+                <td>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary" data-bind="click: edit"><span class="glyphicon glyphicon-edit"></span> Edit</button>
+                        <button type="button" class="btn btn-danger" data-bind="click: remove"><span class="glyphicon glyphicon-trash"></span> Delete</button>                        
+                    </div>
                 </td>
             </tr>
         </tbody>
@@ -49,30 +85,44 @@
 
         function getTestData() {
             return [
-                { title: "The Art of Unit Testing", author: "Roy Osherove", type: "Book", borrowedBy: "Joel S." },
+                { title: "Clean Code", author: "Robert C. Martin", type: "Book", borrowedBy: "Mike" },
+                { title: "The Art of Unit Testing", author: "Roy Osherove", type: "Book", borrowedBy: "Joel" },
+                { title: "Working Effectively With Legacy Code", author: "Michael Feathers", type: "Book", borrowedBy: null },
+                { title: "Head First Design Patterns", author: "Elisabeth Freeman", type: "Book", borrowedBy: "Joel" },
+                { title: "Javascript: The Good Parts", author: "Douglas Crockford", type: "Book", borrowedBy: null },
+                { title: "Apprenticeship Patterns", author: "Dave Hoover", type: "Book", borrowedBy: null },
+
                 { title: "The Dark Side of the Moon", author: "Pink Floyd", type: "CD", borrowedBy: null },
-                { title: "Star Wars: A New Hope", author: "George Lucas", type: "DVD", borrowedBy: "Marilyn G." },
-                { title: "Javascript: The Good Parts", author: "Douglas Crockford", type: "Book", borrowedBy: null},
+                { title: "Star Wars: A New Hope", author: "George Lucas", type: "DVD", borrowedBy: "Marilyn" },
+                { title: "Shane", author: "Jack Schaefer", type: "Book", borrowedBy: null },
+                { title: "Sonic Firestorm", author: "Dragonforce", type: "CD", borrowedBy: "Dave" },
+                { title: "Metal: A Headbanger's Journey", author: "Sam Dunn", type: "DVD", borrowedBy: null },
             ];
+        }
+
+        function setIsDirty(value) {
+            viewModel.isDirty(value);
         }
 
         function Title(data) {
             var self = this;
+
+            if (!data) {
+                data = {};
+            }
 
             this.title = ko.observable(data.title || "");
             this.author = ko.observable(data.author || "");
             this.type = ko.observable(data.type || "");
             this.borrowedBy = ko.observable(data.borrowedBy);
 
-            this.borrow = function() {
-                var borrower = window.prompt("Who is borrowing " + self.title() + "?");
-                if (borrower) {
-                    self.borrowedBy(borrower);
-                }
+            this.borrow = function(borrower) {
+                self.borrowedBy(borrower);
             };
 
             this.unborrow = function() {
                 self.borrowedBy(null);
+                setIsDirty(true);
             };
 
             this.canBorrow = ko.computed(function() {
@@ -82,20 +132,89 @@
             this.canUnBorrow = ko.computed(function() {
                 return self.borrowedBy();
             }, self);
+
+            this.flatten = function() {
+                return {
+                    title: self.title(),
+                    author: self.author(),
+                    type: self.type(),
+                    borrowedBy: self.borrowedBy()
+                };
+            };
+
+            this.remove = function() {
+                alert('Not yet implemented');
+            };
+
+            this.edit = function() {
+                alert('Not yet implemented');
+            };
         }
+
+        var duration = 400;
 
         function MediaListViewModel() {
             var self = this;
 
-            this.media = ko.observable([]);
+            this.media = ko.observableArray([]);
 
             this.newTitle = ko.observable("");
             this.newAuthor = ko.observable("");
-            this.newType = ko.obervable("");
+            this.newType = ko.observable("");
 
-            this.canAddNewTitle = k.computed(function() {
+            this.selectedTitle = ko.observable(null);
+            this.proposedBorrower = ko.observable("");
+            this.titleToBorrow = ko.computed(function() {
+                if (self.selectedTitle()) {
+                    return self.selectedTitle().title();
+                }
+                return "";
+            }, self);
+
+            this.display = ko.observable("media");
+
+            this.isDirty = ko.observable(false);
+
+            this.showNewTitleForm = ko.computed(function() {
+                return self.display() == 'newTitleForm';
+            }, self);
+
+            this.showMedia = ko.computed(function() {
+                return self.display() == 'media';
+            }, self);
+
+            this.canAddNewTitle = ko.computed(function() {
                 return self.newTitle() && self.newAuthor() && self.newType();
             }, self);
+
+            this.borrowedItems = ko.computed(function() {
+                return self.media().filter(function(e) {
+                    return e.borrowedBy();
+                }).length;
+            }, self);
+
+            this.displayBorrowForm = function (title) {
+                self.selectedTitle(title);
+                $("#borrower-form").show();
+                $("#display-media").hide();
+
+                $("#proposed-borrower").focus();
+            };
+
+
+            this.borrow = function() {
+                self.selectedTitle().borrow(self.proposedBorrower());
+                $("#borrower-form").hide();
+                $("#display-media").show();
+
+                this.isDirty(true);
+            };
+
+            this.cancelBorrow = function() {
+                $("#borrower-form").hide();
+                $("#display-media").show();
+            };
+
 
             this.addNewTitle = function() {
                 var title = new Title();
@@ -104,16 +223,67 @@
                 title.type(self.newType());
 
                 self.media.push(title);
+                self.display('media');
+
+                $("#display-media").show(duration);
+                $("#new-title-form").hide(duration);
+
+                this.isDirty(true);
+
+            };
+
+            this.cancelAddNewTitle = function() {
+                self.display('media');
+                $("#display-media").show(duration);
+                $("#new-title-form").hide(duration);
+            };
+
+            this.displayNewTitleForm = function() {
+                self.display('newTitleForm');
+                $("#display-media").hide(duration);
+                $("#new-title-form").show(duration);
+                $("#new-title").focus();
+            };
+
+            this.save = function() {
+                var media = self.media().map(function(e) {
+                    return e.flatten();
+                });
+
+                localStorage.setItem('personal-lending-library', JSON.stringify(media));
+
+                self.isDirty(false);
+            };
+
+            this.exportData = function() {
+                alert('not yet implemented');
+            };
+
+            this.importData = function() {
+                alert('not yet implemented');
             };
         }
 
-        var testData = getTestData();
-        var media = $.map(testData, function(e) {
-            return new Title(e);
-        });
-
         var viewModel = new MediaListViewModel();
-        viewModel.media(media);
+
+        if (localStorage.getItem('personal-lending-library')) {
+            var rawData = localStorage.getItem('personal-lending-library');
+            var data = JSON.parse(rawData);
+            var media = $.map(data, function (e) {
+                return new Title(e);
+            });
+            viewModel.media(media);
+
+        } else {
+            var testData = getTestData();
+            media = $.map(testData, function (e) {
+                return new Title(e);
+            });
+            viewModel.media(media);
+
+        }
+
+
 
         ko.applyBindings(viewModel, $("body")[0]);
     });
