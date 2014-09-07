@@ -16,8 +16,8 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'test-main.js',
-      'Demo-LendingTracker/Scripts/app/**/*.js',
-      'Demo-LendingTracker.Tests/**/*.js'
+      { pattern: 'Demo-LendingTracker.Tests/**/*.js', included: false },
+      { pattern: 'Demo-LendingTracker/Scripts/app/**/*.js', included: false}
     ],
 
 
