@@ -19,7 +19,15 @@ module.exports = function(grunt) {
         eqnull: true,
         browser: true,
         globals: {
-          jQuery: true
+            jQuery: true,
+
+            ko: true,
+            describe: true,
+            it: true,
+            define: true,
+            beforeEach: true,
+            expect: true,
+            alert:true
         }
       },
       gruntfile: {

@@ -17,7 +17,7 @@ module.exports = function(config) {
     files: [
       'test-main.js',
       { pattern: 'Demo-LendingTracker.Tests/**/*.js', included: false },
-      { pattern: 'Demo-LendingTracker/Scripts/app/**/*.js', included: false}
+      { pattern: 'Demo-LendingTracker/Scripts/**/*.js', included: false}
     ],
 
 
