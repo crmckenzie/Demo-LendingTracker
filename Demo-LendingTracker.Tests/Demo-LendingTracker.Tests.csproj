@@ -60,6 +60,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="fake-localStorage.js" />
+    <Content Include="media-list-viewmodel-tests.js" />
     <Content Include="title-viewmodel-tests.js" />
   </ItemGroup>
   <PropertyGroup>

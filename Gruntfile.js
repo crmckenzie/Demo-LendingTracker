@@ -27,7 +27,8 @@ module.exports = function(grunt) {
             define: true,
             beforeEach: true,
             expect: true,
-            alert:true
+            alert: true,
+            spyOn: true
         }
       },
       gruntfile: {

@@ -81,7 +81,7 @@
 </div>
 
 <script type="text/javascript">
-    require(['jquery', 'ko'], function($, ko) {
+    require(['jquery', 'ko', 'app/title-viewmodel', 'PubSub'], function($, ko, TitleViewModel, PubSub) {
         $(function () {
 
             function getTestData() {
@@ -105,52 +105,9 @@
                 viewModel.isDirty(value);
             }
 
-            function Title(data) {
-                var self = this;
-
-                if (!data) {
-                    data = {};
-                }
-
-                this.title = ko.observable(data.title || "");
-                this.author = ko.observable(data.author || "");
-                this.type = ko.observable(data.type || "");
-                this.borrowedBy = ko.observable(data.borrowedBy);
-
-                this.borrow = function (borrower) {
-                    self.borrowedBy(borrower);
-                };
-
-                this.unborrow = function () {
-                    self.borrowedBy(null);
-                    setIsDirty(true);
-                };
-
-                this.canBorrow = ko.computed(function () {
-                    return self.borrowedBy() == null;
-                }, self);
-
-                this.canUnBorrow = ko.computed(function () {
-                    return self.borrowedBy();
-                }, self);
-
-                this.flatten = function () {
-                    return {
-                        title: self.title(),
-                        author: self.author(),
-                        type: self.type(),
-                        borrowedBy: self.borrowedBy()
-                    };
-                };
-
-                this.remove = function () {
-                    alert('Not yet implemented');
-                };
-
-                this.edit = function () {
-                    alert('Not yet implemented');
-                };
-            }
+            PubSub.subscribe('unborrow', function(msg, data) {
+                setIsDirty(true);
+            });
 
             var duration = 400;
 
@@ -218,7 +175,7 @@
 
 
                 this.addNewTitle = function () {
-                    var title = new Title();
+                    var title = new TitleViewModel();
                     title.title(self.newTitle());
                     title.author(self.newAuthor());
                     title.type(self.newType());
@@ -271,14 +228,14 @@
                 var rawData = localStorage.getItem('personal-lending-library');
                 var data = JSON.parse(rawData);
                 var media = $.map(data, function (e) {
-                    return new Title(e);
+                    return new TitleViewModel(e);
                 });
                 viewModel.media(media);
 
             } else {
                 var testData = getTestData();
                 media = $.map(testData, function (e) {
-                    return new Title(e);
+                    return new TitleViewModel(e);
                 });
                 viewModel.media(media);
 
