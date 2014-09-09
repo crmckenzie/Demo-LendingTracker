@@ -25,7 +25,7 @@
             <input id="proposed-borrower" class="form-control" data-bind="value: proposedBorrower"/>
         </div>
         <div class="form-group">
-            <button class="btn btn-success" data-bind="enable: proposedBorrower(), click: borrow">Add</button>
+            <button class="btn btn-success" data-bind="enable: proposedBorrower(), click: borrow">OK</button>
             <button class="btn btn-danger" data-bind="click: function(){ $root.cancelBorrow(); } ">Cancel</button>
         </div>
     </form>
@@ -81,7 +81,7 @@
 </div>
 
 <script type="text/javascript">
-    require(['jquery', 'ko', 'app/title-viewmodel', 'PubSub'], function($, ko, TitleViewModel, PubSub) {
+    require(['jquery', 'ko', 'app/title-viewmodel', 'app/media-list-viewmodel','PubSub'], function($, ko, TitleViewModel, MediaListViewModel, PubSub) {
         $(function () {
 
             function getTestData() {
@@ -109,120 +109,30 @@
                 setIsDirty(true);
             });
 
-            var duration = 400;
-
-            function MediaListViewModel() {
-                var self = this;
-
-                this.media = ko.observableArray([]);
-
-                this.newTitle = ko.observable("");
-                this.newAuthor = ko.observable("");
-                this.newType = ko.observable("");
-
-                this.selectedTitle = ko.observable(null);
-                this.proposedBorrower = ko.observable("");
-                this.titleToBorrow = ko.computed(function () {
-                    if (self.selectedTitle()) {
-                        return self.selectedTitle().title();
-                    }
-                    return "";
-                }, self);
-
-                this.display = ko.observable("media");
-
-                this.isDirty = ko.observable(false);
-
-                this.showNewTitleForm = ko.computed(function () {
-                    return self.display() == 'newTitleForm';
-                }, self);
-
-                this.showMedia = ko.computed(function () {
-                    return self.display() == 'media';
-                }, self);
-
-                this.canAddNewTitle = ko.computed(function () {
-                    return self.newTitle() && self.newAuthor() && self.newType();
-                }, self);
-
-                this.borrowedItems = ko.computed(function () {
-                    return self.media().filter(function (e) {
-                        return e.borrowedBy();
-                    }).length;
-                }, self);
-
-                this.displayBorrowForm = function (title) {
-                    self.selectedTitle(title);
-                    $("#borrower-form").show();
-                    $("#display-media").hide();
-
-                    $("#proposed-borrower").focus();
-                };
-
-
-                this.borrow = function () {
-                    self.selectedTitle().borrow(self.proposedBorrower());
-                    $("#borrower-form").hide();
-                    $("#display-media").show();
-
-                    this.isDirty(true);
-                };
-
-                this.cancelBorrow = function () {
-                    $("#borrower-form").hide();
-                    $("#display-media").show();
-                };
-
-
-                this.addNewTitle = function () {
-                    var title = new TitleViewModel();
-                    title.title(self.newTitle());
-                    title.author(self.newAuthor());
-                    title.type(self.newType());
-
-                    self.media.push(title);
-                    self.display('media');
-
-                    $("#display-media").show(duration);
-                    $("#new-title-form").hide(duration);
-
-                    this.isDirty(true);
-
-                };
-
-                this.cancelAddNewTitle = function () {
-                    self.display('media');
-                    $("#display-media").show(duration);
-                    $("#new-title-form").hide(duration);
-                };
-
-                this.displayNewTitleForm = function () {
-                    self.display('newTitleForm');
-                    $("#display-media").hide(duration);
-                    $("#new-title-form").show(duration);
-                    $("#new-title").focus();
-                };
-
-                this.save = function () {
-                    var media = self.media().map(function (e) {
-                        return e.flatten();
-                    });
-
-                    localStorage.setItem('personal-lending-library', JSON.stringify(media));
-
-                    self.isDirty(false);
-                };
-
-                this.exportData = function () {
-                    alert('not yet implemented');
-                };
-
-                this.importData = function () {
-                    alert('not yet implemented');
-                };
-            }
-
             var viewModel = new MediaListViewModel();
+
+            viewModel.display.subscribe(function (newValue) {
+
+                var duration = 400;
+
+                switch (newValue) {
+                    case 'borrower-form':
+                        $("#display-media").hide(duration);
+                        $("#borrower-form").show(duration);
+                        break;
+
+                    case 'newTitleForm':
+                        $("#display-media").hide(duration);
+                        $("#new-title-form").show(duration);
+                        break;
+
+                    case 'media':
+                        $("#new-title-form").hide(duration);
+                        $("#display-media").show(duration);
+                        $("#borrower-form").hide(duration);
+                        break;
+                }
+            });
 
             if (localStorage.getItem('personal-lending-library')) {
                 var rawData = localStorage.getItem('personal-lending-library');

@@ -1,4 +1,4 @@
-﻿define(['ko', 'jquery', 'app/title-viewmodel', 'PubSub'], function (ko, $, TitleViewModel, PubSub) {
+﻿define(['ko', 'jquery', 'app/title-viewmodel'], function (ko, $, TitleViewModel) {
 
     function MediaListViewModel(options) {
         var self = this;
@@ -51,20 +51,19 @@
 
         this.displayBorrowForm = function (title) {
             self.selectedTitle(title);
-            PubSub.publish('display-borrow-form', self);
+            self.display('borrower-form');
         };
 
 
         this.borrow = function () {
             self.selectedTitle().borrow(self.proposedBorrower());
-            PubSub.publish('borrow', self);
             this.isDirty(true);
+            this.display('media');
         };
 
         this.cancelBorrow = function () {
-            PubSub.publish('cancel-borrow', self);
+            this.display('media');
         };
-
 
         this.addNewTitle = function () {
             var title = new TitleViewModel();
@@ -76,19 +75,14 @@
             self.display('media');
 
             this.isDirty(true);
-
-            PubSub.publish('add-new-title', self);
-
         };
 
         this.cancelAddNewTitle = function () {
             self.display('media');
-            PubSub.publish('cancel-add-new-title', self);
         };
 
         this.displayNewTitleForm = function () {
             self.display('newTitleForm');
-            PubSub.publish('display-new-title-form', self);
         };
 
         this.save = function () {

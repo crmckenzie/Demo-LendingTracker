@@ -1,5 +1,5 @@
-﻿define(['app/media-list-viewmodel', 'app/title-viewmodel', 'jquery', 'PubSub', 'tests/fake-localStorage'],
-    function (MediaListViewModel, TitleViewModel, $, PubSub, FakeLocalStorage) {
+﻿define(['app/media-list-viewmodel', 'app/title-viewmodel', 'jquery', 'tests/fake-localStorage'],
+    function (MediaListViewModel, TitleViewModel, $, FakeLocalStorage) {
 
     describe('MediaListViewModel', function() {
 
@@ -125,20 +125,12 @@
                     expect(this.viewModel.selectedTitle()).toBe(this.title);
                 });
 
-                it('sends a message', function() {
-                    var messageReceived = false;
-                    var viewModel = this.viewModel;
-                    PubSub.publish = PubSub.publishSync;
-
-                    var token = PubSub.subscribe('display-borrow-form', function (msg, data) {
-                        expect(data).toBe(viewModel);
-                        messageReceived = true;
-                    });
+                it('sets display to borrower-form', function () {
+                    this.viewModel.display('media');
 
                     this.viewModel.displayBorrowForm(this.title);
 
-                    PubSub.unsubscribe(token);
-                    expect(messageReceived).toBe(true);
+                    expect(this.viewModel.display()).toBe('borrower-form');
                 });
 
             });
@@ -169,40 +161,24 @@
                     expect(this.viewModel.isDirty()).toBe(true);
                 });
 
-                it('sends a message', function() {
-                    var messageReceived = false;
-                    var viewModel = this.viewModel;
-                    PubSub.publish = PubSub.publishSync;
-
-                    var token = PubSub.subscribe('borrow', function (msg, data) {
-                        expect(data).toBe(viewModel);
-                        messageReceived = true;
-                    });
+                it('sets display to media', function () {
+                    this.viewModel.display('borrower-form');
 
                     this.viewModel.borrow();
 
-                    PubSub.unsubscribe(token);
-                    expect(messageReceived).toBe(true);
-
+                    expect(this.viewModel.display()).toBe('media');
                 });
 
             });
 
             describe('.cancelBorrow', function() {
-                it('sends a message', function () {
-                    var messageReceived = false;
-                    var viewModel = this.viewModel;
-                    PubSub.publish = PubSub.publishSync;
 
-                    var token = PubSub.subscribe('cancel-borrow', function (msg, data) {
-                        expect(data).toBe(viewModel);
-                        messageReceived = true;
-                    });
+                it('sets display to media', function() {
+                    this.viewModel.display('borrower-form');
 
                     this.viewModel.cancelBorrow();
 
-                    PubSub.unsubscribe(token);
-                    expect(messageReceived).toBe(true);
+                    expect(this.viewModel.display()).toBe('media');
                 });
             });
 
@@ -236,22 +212,6 @@
                     expect(this.viewModel.isDirty()).toBe(true);
                 });
 
-                it('sends a message', function() {
-                    var messageReceived = false;
-                    var viewModel = this.viewModel;
-                    PubSub.publish = PubSub.publishSync;
-
-                    var token = PubSub.subscribe('add-new-title', function (msg, data) {
-                        expect(data).toBe(viewModel);
-                        messageReceived = true;
-                    });
-
-                    this.viewModel.addNewTitle();
-
-                    PubSub.unsubscribe(token);
-                    expect(messageReceived).toBe(true);
-
-                });
             });
 
             describe('.cancelAddNewTitle', function() {
@@ -269,22 +229,6 @@
                 it('resets display to media', function() {
                     expect(this.viewModel.display()).toBe('media');
                 });
-
-                it('sends a message', function () {
-                    var messageReceived = false;
-                    var viewModel = this.viewModel;
-                    PubSub.publish = PubSub.publishSync;
-
-                    var token = PubSub.subscribe('cancel-add-new-title', function (msg, data) {
-                        expect(data).toBe(viewModel);
-                        messageReceived = true;
-                    });
-
-                    this.viewModel.cancelAddNewTitle();
-
-                    PubSub.unsubscribe(token);
-                    expect(messageReceived).toBe(true);
-                });
             });
 
             describe('.displayNewTitleForm', function() {
@@ -295,22 +239,6 @@
                     expect(this.viewModel.display()).toBe('newTitleForm');
                 });
 
-                it('sends a message', function() {
-                    var messageReceived = false;
-                    var viewModel = this.viewModel;
-                    PubSub.publish = PubSub.publishSync;
-
-                    var token = PubSub.subscribe('display-new-title-form', function (msg, data) {
-                        expect(data).toBe(viewModel);
-                        messageReceived = true;
-                    });
-
-                    this.viewModel.displayNewTitleForm();
-
-                    PubSub.unsubscribe(token);
-                    expect(messageReceived).toBe(true);
-
-                });
             });
 
             describe('.save', function() {
