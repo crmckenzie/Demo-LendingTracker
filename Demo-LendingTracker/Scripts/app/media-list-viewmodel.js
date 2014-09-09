@@ -102,6 +102,18 @@
         this.importData = function () {
             alert('not yet implemented');
         };
+
+        this.load = function() {
+            var rawData = self.settings.localStorage.getItem('personal-lending-library');
+            if (rawData) {
+                var data = JSON.parse(rawData);
+                var media = $.map(data, function (e) {
+                    return new TitleViewModel(e);
+                });
+                self.media(media);
+                self.isDirty(false);
+            }
+        };
     }
 
     return MediaListViewModel;

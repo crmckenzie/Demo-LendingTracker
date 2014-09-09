@@ -81,36 +81,14 @@
 </div>
 
 <script type="text/javascript">
-    require(['jquery', 'ko', 'app/title-viewmodel', 'app/media-list-viewmodel','PubSub'], function($, ko, TitleViewModel, MediaListViewModel, PubSub) {
-        $(function () {
+    require(['jquery', 'ko', 'app/title-viewmodel', 'app/media-list-viewmodel', 'PubSub'],
+        function ($, ko, TitleViewModel, MediaListViewModel, PubSub) {
 
-            function getTestData() {
-                return [
-                    { title: "Clean Code", author: "Robert C. Martin", type: "Book", borrowedBy: "Mike" },
-                    { title: "The Art of Unit Testing", author: "Roy Osherove", type: "Book", borrowedBy: "Joel" },
-                    { title: "Working Effectively With Legacy Code", author: "Michael Feathers", type: "Book", borrowedBy: null },
-                    { title: "Head First Design Patterns", author: "Elisabeth Freeman", type: "Book", borrowedBy: "Joel" },
-                    { title: "Javascript: The Good Parts", author: "Douglas Crockford", type: "Book", borrowedBy: null },
-                    { title: "Apprenticeship Patterns", author: "Dave Hoover", type: "Book", borrowedBy: null },
+            $(function () {
 
-                    { title: "The Dark Side of the Moon", author: "Pink Floyd", type: "CD", borrowedBy: null },
-                    { title: "Star Wars: A New Hope", author: "George Lucas", type: "DVD", borrowedBy: "Marilyn" },
-                    { title: "Shane", author: "Jack Schaefer", type: "Book", borrowedBy: null },
-                    { title: "Sonic Firestorm", author: "Dragonforce", type: "CD", borrowedBy: "Dave" },
-                    { title: "Metal: A Headbanger's Journey", author: "Sam Dunn", type: "DVD", borrowedBy: null },
-                ];
-            }
 
-            function setIsDirty(value) {
-                viewModel.isDirty(value);
-            }
-
-            PubSub.subscribe('unborrow', function(msg, data) {
-                setIsDirty(true);
-            });
 
             var viewModel = new MediaListViewModel();
-
             viewModel.display.subscribe(function (newValue) {
 
                 var duration = 400;
@@ -134,24 +112,33 @@
                 }
             });
 
-            if (localStorage.getItem('personal-lending-library')) {
-                var rawData = localStorage.getItem('personal-lending-library');
-                var data = JSON.parse(rawData);
-                var media = $.map(data, function (e) {
+            PubSub.subscribe('unborrow', function (msg, data) {
+                viewModel.isDirty(value);
+            });
+
+            viewModel.load();
+
+            if (viewModel.media().length === 0) {
+                var testData = [
+                        { title: "Clean Code", author: "Robert C. Martin", type: "Book", borrowedBy: "Mike" },
+                        { title: "The Art of Unit Testing", author: "Roy Osherove", type: "Book", borrowedBy: "Joel" },
+                        { title: "Working Effectively With Legacy Code", author: "Michael Feathers", type: "Book", borrowedBy: null },
+                        { title: "Head First Design Patterns", author: "Elisabeth Freeman", type: "Book", borrowedBy: "Joel" },
+                        { title: "Javascript: The Good Parts", author: "Douglas Crockford", type: "Book", borrowedBy: null },
+                        { title: "Apprenticeship Patterns", author: "Dave Hoover", type: "Book", borrowedBy: null },
+
+                        { title: "The Dark Side of the Moon", author: "Pink Floyd", type: "CD", borrowedBy: null },
+                        { title: "Star Wars: A New Hope", author: "George Lucas", type: "DVD", borrowedBy: "Marilyn" },
+                        { title: "Shane", author: "Jack Schaefer", type: "Book", borrowedBy: null },
+                        { title: "Sonic Firestorm", author: "Dragonforce", type: "CD", borrowedBy: "Dave" },
+                        { title: "Metal: A Headbanger's Journey", author: "Sam Dunn", type: "DVD", borrowedBy: null },
+                    ];
+
+                var media = $.map(testData, function (e) {
                     return new TitleViewModel(e);
                 });
                 viewModel.media(media);
-
-            } else {
-                var testData = getTestData();
-                media = $.map(testData, function (e) {
-                    return new TitleViewModel(e);
-                });
-                viewModel.media(media);
-
             }
-
-
 
             ko.applyBindings(viewModel, $("body")[0]);
         });

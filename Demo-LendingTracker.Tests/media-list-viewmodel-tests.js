@@ -2,6 +2,18 @@
     function (MediaListViewModel, TitleViewModel, $, FakeLocalStorage) {
 
     describe('MediaListViewModel', function() {
+        
+        function getTestData() {
+            return [
+                { title: "Clean Code", author: "Robert C. Martin", type: "Book", borrowedBy: "Mike" },
+                { title: "The Art of Unit Testing", author: "Roy Osherove", type: "Book", borrowedBy: "Joel" },
+                { title: "Working Effectively With Legacy Code", author: "Michael Feathers", type: "Book", borrowedBy: null },
+                { title: "Head First Design Patterns", author: "Elisabeth Freeman", type: "Book", borrowedBy: "Joel" },
+                { title: "Javascript: The Good Parts", author: "Douglas Crockford", type: "Book", borrowedBy: null },
+                { title: "Apprenticeship Patterns", author: "Dave Hoover", type: "Book", borrowedBy: null },
+            ];
+        }
+
 
         describe('.ctor', function () {
             beforeEach(function () {
@@ -86,17 +98,6 @@
             });
 
             describe('.borrowedItems', function() {
-
-                function getTestData() {
-                    return [
-                        { title: "Clean Code", author: "Robert C. Martin", type: "Book", borrowedBy: "Mike" },
-                        { title: "The Art of Unit Testing", author: "Roy Osherove", type: "Book", borrowedBy: "Joel" },
-                        { title: "Working Effectively With Legacy Code", author: "Michael Feathers", type: "Book", borrowedBy: null },
-                        { title: "Head First Design Patterns", author: "Elisabeth Freeman", type: "Book", borrowedBy: "Joel" },
-                        { title: "Javascript: The Good Parts", author: "Douglas Crockford", type: "Book", borrowedBy: null },
-                        { title: "Apprenticeship Patterns", author: "Dave Hoover", type: "Book", borrowedBy: null },
-                    ];
-                }
 
                 beforeEach(function () {
                     var data = getTestData();
@@ -225,7 +226,6 @@
                     this.viewModel.cancelAddNewTitle();
                 });
 
-
                 it('resets display to media', function() {
                     expect(this.viewModel.display()).toBe('media');
                 });
@@ -257,6 +257,31 @@
                     expect(this.localStorage.keys).toContain('personal-lending-library');
                 });
 
+            });
+
+            describe('.load', function() {
+
+                beforeEach(function() {
+                    var data = getTestData();
+                    var media = $.map(data, function (e) {
+                        return new TitleViewModel(e);
+                    });
+                    this.viewModel.media(media);
+
+                    this.viewModel.save();
+
+                    this.viewModel.media([]);
+                });
+
+                it('loads data from localStorage', function() {
+                    this.viewModel.load();
+
+                    expect(this.viewModel.media().length).toBe(6);
+                });
+
+                it('sets isDirty to false', function() {
+                    expect(this.viewModel.isDirty()).toBe(false);
+                });
             });
 
         });
