@@ -186,10 +186,11 @@ I use Windows so these instructions are for windows developers
 
     <code>
 
+        // list of files / patterns to load in the browser
         files: [
           'test-main.js',
-          'Demo-LendingTracker/Scripts/app/**/*.js',
-          'Demo-LendingTracker.Tests/**/*.js'
+          { pattern: 'Demo-LendingTracker.Tests/**/*.js', included: false },
+          { pattern: 'Demo-LendingTracker/Scripts/app/**/*.js', included: false}
         ],
 
 
@@ -203,6 +204,9 @@ I use Windows so these instructions are for windows developers
     <div class="well">
         You can verify that your default karma configuration is correct by running karma start.
         If you start adding files to the monitored js folders karma should detect the changes.
+
+        It's important to specify included: false on the js files since we are going to load them
+        using requirejs.
     </div>
 
 7. Edit test-main.js
@@ -232,12 +236,14 @@ I use Windows so these instructions are for windows developers
             deps: allTestFiles,
 
             paths: {
+                "bootstrap": 'bootstrap',
                 "tests": "/base/Demo-LendingTracker.Tests",
-                "jquery": "//code.jquery.com/jquery-2.1.0.min",
-                'ko': '//ajax.aspnetcdn.com/ajax/knockout/knockout-3.0.0',
-                "PubSub": '//cdn.jsdelivr.net/pubsubjs/1.4.2/pubsub.min',
+                "jquery": "jquery-2.1.1",
+                'ko': 'knockout-3.2.0',
+                "PubSub": '//cdn.jsdelivr.net/pubsubjs/1.4.2/pubsub.min'
             },
             shim: {
+                bootstrap: ["jquery"],
                 ko: { exports: 'ko' },
                 PubSub: { exports: 'PubSub' }
             },
@@ -277,7 +283,6 @@ I use Windows so these instructions are for windows developers
       });
 
       // These plugins provide necessary tasks.
-      grunt.loadNpmTasks('grunt-contrib-qunit');
       grunt.loadNpmTasks('grunt-contrib-jshint');
       grunt.loadNpmTasks('grunt-contrib-watch');
       grunt.loadNpmTasks('grunt-karma');

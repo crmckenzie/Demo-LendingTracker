@@ -21,12 +21,14 @@ require.config({
     deps: allTestFiles,
 
     paths: {
+        "bootstrap": 'bootstrap',
         "tests": "/base/Demo-LendingTracker.Tests",
-        "jquery": "//code.jquery.com/jquery-2.1.0.min",
-        'ko': '//ajax.aspnetcdn.com/ajax/knockout/knockout-3.0.0',
-        "PubSub": '//cdn.jsdelivr.net/pubsubjs/1.4.2/pubsub.min',
+        "jquery": "jquery-2.1.1",
+        'ko': 'knockout-3.2.0',
+        "PubSub": '//cdn.jsdelivr.net/pubsubjs/1.4.2/pubsub.min'
     },
     shim: {
+        bootstrap: ["jquery"],
         ko: { exports: 'ko' },
         PubSub: { exports: 'PubSub' }
     },

@@ -19,7 +19,16 @@ module.exports = function(grunt) {
         eqnull: true,
         browser: true,
         globals: {
-          jQuery: true
+            jQuery: true,
+
+            ko: true,
+            describe: true,
+            it: true,
+            define: true,
+            beforeEach: true,
+            expect: true,
+            alert: true,
+            spyOn: true
         }
       },
       gruntfile: {
@@ -75,7 +84,6 @@ module.exports = function(grunt) {
   });
 
   // These plugins provide necessary tasks.
-  grunt.loadNpmTasks('grunt-contrib-qunit');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-karma');

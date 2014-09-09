@@ -25,7 +25,7 @@
             <input id="proposed-borrower" class="form-control" data-bind="value: proposedBorrower"/>
         </div>
         <div class="form-group">
-            <button class="btn btn-success" data-bind="enable: proposedBorrower(), click: borrow">Add</button>
+            <button class="btn btn-success" data-bind="enable: proposedBorrower(), click: borrow">OK</button>
             <button class="btn btn-danger" data-bind="click: function(){ $root.cancelBorrow(); } ">Cancel</button>
         </div>
     </form>
@@ -81,211 +81,69 @@
 </div>
 
 <script type="text/javascript">
-    $(function () {
+    require(['jquery', 'ko', 'app/title-viewmodel', 'app/media-list-viewmodel', 'PubSub'],
+        function ($, ko, TitleViewModel, MediaListViewModel, PubSub) {
 
-        function getTestData() {
-            return [
-                { title: "Clean Code", author: "Robert C. Martin", type: "Book", borrowedBy: "Mike" },
-                { title: "The Art of Unit Testing", author: "Roy Osherove", type: "Book", borrowedBy: "Joel" },
-                { title: "Working Effectively With Legacy Code", author: "Michael Feathers", type: "Book", borrowedBy: null },
-                { title: "Head First Design Patterns", author: "Elisabeth Freeman", type: "Book", borrowedBy: "Joel" },
-                { title: "Javascript: The Good Parts", author: "Douglas Crockford", type: "Book", borrowedBy: null },
-                { title: "Apprenticeship Patterns", author: "Dave Hoover", type: "Book", borrowedBy: null },
+            $(function () {
 
-                { title: "The Dark Side of the Moon", author: "Pink Floyd", type: "CD", borrowedBy: null },
-                { title: "Star Wars: A New Hope", author: "George Lucas", type: "DVD", borrowedBy: "Marilyn" },
-                { title: "Shane", author: "Jack Schaefer", type: "Book", borrowedBy: null },
-                { title: "Sonic Firestorm", author: "Dragonforce", type: "CD", borrowedBy: "Dave" },
-                { title: "Metal: A Headbanger's Journey", author: "Sam Dunn", type: "DVD", borrowedBy: null },
-            ];
-        }
 
-        function setIsDirty(value) {
-            viewModel.isDirty(value);
-        }
 
-        function Title(data) {
-            var self = this;
+            var viewModel = new MediaListViewModel();
+            viewModel.display.subscribe(function (newValue) {
 
-            if (!data) {
-                data = {};
+                var duration = 400;
+
+                switch (newValue) {
+                    case 'borrower-form':
+                        $("#display-media").hide(duration);
+                        $("#borrower-form").show(duration);
+                        break;
+
+                    case 'newTitleForm':
+                        $("#display-media").hide(duration);
+                        $("#new-title-form").show(duration);
+                        break;
+
+                    case 'media':
+                        $("#new-title-form").hide(duration);
+                        $("#display-media").show(duration);
+                        $("#borrower-form").hide(duration);
+                        break;
+                }
+            });
+
+            PubSub.subscribe('unborrow', function (msg, data) {
+                viewModel.isDirty(value);
+            });
+
+            viewModel.load();
+
+            if (viewModel.media().length === 0) {
+                var testData = [
+                        { title: "Clean Code", author: "Robert C. Martin", type: "Book", borrowedBy: "Mike" },
+                        { title: "The Art of Unit Testing", author: "Roy Osherove", type: "Book", borrowedBy: "Joel" },
+                        { title: "Working Effectively With Legacy Code", author: "Michael Feathers", type: "Book", borrowedBy: null },
+                        { title: "Head First Design Patterns", author: "Elisabeth Freeman", type: "Book", borrowedBy: "Joel" },
+                        { title: "Javascript: The Good Parts", author: "Douglas Crockford", type: "Book", borrowedBy: null },
+                        { title: "Apprenticeship Patterns", author: "Dave Hoover", type: "Book", borrowedBy: null },
+
+                        { title: "The Dark Side of the Moon", author: "Pink Floyd", type: "CD", borrowedBy: null },
+                        { title: "Star Wars: A New Hope", author: "George Lucas", type: "DVD", borrowedBy: "Marilyn" },
+                        { title: "Shane", author: "Jack Schaefer", type: "Book", borrowedBy: null },
+                        { title: "Sonic Firestorm", author: "Dragonforce", type: "CD", borrowedBy: "Dave" },
+                        { title: "Metal: A Headbanger's Journey", author: "Sam Dunn", type: "DVD", borrowedBy: null },
+                    ];
+
+                var media = $.map(testData, function (e) {
+                    return new TitleViewModel(e);
+                });
+                viewModel.media(media);
             }
 
-            this.title = ko.observable(data.title || "");
-            this.author = ko.observable(data.author || "");
-            this.type = ko.observable(data.type || "");
-            this.borrowedBy = ko.observable(data.borrowedBy);
+            ko.applyBindings(viewModel, $("body")[0]);
+        });
 
-            this.borrow = function(borrower) {
-                self.borrowedBy(borrower);
-            };
-
-            this.unborrow = function() {
-                self.borrowedBy(null);
-                setIsDirty(true);
-            };
-
-            this.canBorrow = ko.computed(function() {
-                return self.borrowedBy() == null;
-            }, self);
-
-            this.canUnBorrow = ko.computed(function() {
-                return self.borrowedBy();
-            }, self);
-
-            this.flatten = function() {
-                return {
-                    title: self.title(),
-                    author: self.author(),
-                    type: self.type(),
-                    borrowedBy: self.borrowedBy()
-                };
-            };
-
-            this.remove = function() {
-                alert('Not yet implemented');
-            };
-
-            this.edit = function() {
-                alert('Not yet implemented');
-            };
-        }
-
-        var duration = 400;
-
-        function MediaListViewModel() {
-            var self = this;
-
-            this.media = ko.observableArray([]);
-
-            this.newTitle = ko.observable("");
-            this.newAuthor = ko.observable("");
-            this.newType = ko.observable("");
-
-            this.selectedTitle = ko.observable(null);
-            this.proposedBorrower = ko.observable("");
-            this.titleToBorrow = ko.computed(function() {
-                if (self.selectedTitle()) {
-                    return self.selectedTitle().title();
-                }
-                return "";
-            }, self);
-
-            this.display = ko.observable("media");
-
-            this.isDirty = ko.observable(false);
-
-            this.showNewTitleForm = ko.computed(function() {
-                return self.display() == 'newTitleForm';
-            }, self);
-
-            this.showMedia = ko.computed(function() {
-                return self.display() == 'media';
-            }, self);
-
-            this.canAddNewTitle = ko.computed(function() {
-                return self.newTitle() && self.newAuthor() && self.newType();
-            }, self);
-
-            this.borrowedItems = ko.computed(function() {
-                return self.media().filter(function(e) {
-                    return e.borrowedBy();
-                }).length;
-            }, self);
-
-            this.displayBorrowForm = function (title) {
-                self.selectedTitle(title);
-                $("#borrower-form").show();
-                $("#display-media").hide();
-
-                $("#proposed-borrower").focus();
-            };
-
-
-            this.borrow = function() {
-                self.selectedTitle().borrow(self.proposedBorrower());
-                $("#borrower-form").hide();
-                $("#display-media").show();
-
-                this.isDirty(true);
-            };
-
-            this.cancelBorrow = function() {
-                $("#borrower-form").hide();
-                $("#display-media").show();
-            };
-
-
-            this.addNewTitle = function() {
-                var title = new Title();
-                title.title(self.newTitle());
-                title.author(self.newAuthor());
-                title.type(self.newType());
-
-                self.media.push(title);
-                self.display('media');
-
-                $("#display-media").show(duration);
-                $("#new-title-form").hide(duration);
-
-                this.isDirty(true);
-
-            };
-
-            this.cancelAddNewTitle = function() {
-                self.display('media');
-                $("#display-media").show(duration);
-                $("#new-title-form").hide(duration);
-            };
-
-            this.displayNewTitleForm = function() {
-                self.display('newTitleForm');
-                $("#display-media").hide(duration);
-                $("#new-title-form").show(duration);
-                $("#new-title").focus();
-            };
-
-            this.save = function() {
-                var media = self.media().map(function(e) {
-                    return e.flatten();
-                });
-
-                localStorage.setItem('personal-lending-library', JSON.stringify(media));
-
-                self.isDirty(false);
-            };
-
-            this.exportData = function() {
-                alert('not yet implemented');
-            };
-
-            this.importData = function() {
-                alert('not yet implemented');
-            };
-        }
-
-        var viewModel = new MediaListViewModel();
-
-        if (localStorage.getItem('personal-lending-library')) {
-            var rawData = localStorage.getItem('personal-lending-library');
-            var data = JSON.parse(rawData);
-            var media = $.map(data, function (e) {
-                return new Title(e);
-            });
-            viewModel.media(media);
-
-        } else {
-            var testData = getTestData();
-            media = $.map(testData, function (e) {
-                return new Title(e);
-            });
-            viewModel.media(media);
-
-        }
-
-
-
-        ko.applyBindings(viewModel, $("body")[0]);
     });
+
 </script>
 
